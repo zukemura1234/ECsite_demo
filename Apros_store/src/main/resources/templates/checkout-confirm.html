@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/layout :: head('ご注文内容の確認')}">
+    <title>ご注文内容の確認 | アプロスストア</title>
+</head>
+
+<body class="">
+
+    <!-- ヘッダー -->
+    <header th:replace="~{fragments/layout :: header}"></header>
+
+    <main id="main" class="container page-main">
+
+        <!-- 注文ステップ -->
+        <div th:replace="~{fragments/layout :: steps(3)}"></div>
+
+        <!-- ページタイトル -->
+        <div class="page-heading">
+            <p class="eyebrow">REVIEW YOUR ORDER</p>
+            <h1>ご注文内容の確認</h1>
+            <p>内容をご確認のうえ、「注文を確定する」を押してください。</p>
+        </div>
+
+        <!-- エラーメッセージ -->
+        <p class="alert"
+           th:if="${error}"
+           th:text="${error}"
+           role="alert">
+        </p>
+
+        <p class="alert"
+           th:if="${orderError}"
+           th:text="${orderError}"
+           role="alert">
+        </p>
+
+        <div class="checkout-grid">
+
+            <!-- 左側：注文内容・配送先・支払い方法 -->
+            <div class="stack">
+
+                <!-- 注文商品一覧 -->
+                <section th:replace="~{fragments/layout :: items(false)}"></section>
+
+                <div class="review-grid">
+
+                    <!-- お届け先 -->
+                    <section class="panel">
+
+                        <div class="section-heading">
+                            <h2>お届け先</h2>
+                            <a th:href="@{/checkout}">変更</a>
+                        </div>
+
+                        <p>
+                            <strong th:text="${name}">お名前</strong> 様
+                        </p>
+
+                        <p>
+                            〒<span th:text="${postalCode}"></span>
+                        </p>
+
+                        <p>
+                            <span th:text="${prefecture}"></span>
+                            <span th:text="${city}"></span>
+                            <span th:text="${addressLine}"></span>
+                            <br>
+                            <span th:text="${building}"></span>
+                        </p>
+
+                    </section>
+
+                    <!-- お支払い方法 -->
+                    <section class="panel">
+
+                        <div class="section-heading">
+                            <h2>お支払い方法</h2>
+                            <a th:href="@{/checkout}">変更</a>
+                        </div>
+
+                        <p th:text="${paymentMethod}">
+                            お支払い方法
+                        </p>
+
+                        <p class="muted tiny">
+                            実際の決済は行われません。
+                        </p>
+
+                    </section>
+
+                </div>
+
+                <!-- 前の画面に戻る -->
+                <a class="back-link" th:href="@{/checkout}">
+                    ← 配送先・お支払いに戻る
+                </a>
+
+            </div>
+
+            <!-- 右側：注文金額・注文確定 -->
+            <div class="sticky-column">
+
+                <!-- 注文金額のサマリー -->
+                <aside th:replace="~{fragments/layout :: summary}"></aside>
+
+                <!-- 注文確定フォーム -->
+                <form th:action="@{/checkout/place-order}"
+                      method="post"
+                      data-submit-once>
+
+                    <input type="hidden"
+                           name="orderToken"
+                           th:value="${session.checkoutToken}">
+
+                    <button class="button primary full" type="submit">
+                        注文を確定する →
+                    </button>
+
+                </form>
+
+                <p class="muted tiny centered">
+                    学習用デモの注文が確定します。
+                </p>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- フッター -->
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

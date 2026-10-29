@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/layout :: head('暮らしのそばに、いつも。')}">
+    <title>暮らしのそばに、いつも。 | アプロスストア</title>
+</head>
+
+<body>
+    <header th:replace="~{fragments/layout :: header}"></header>
+
+    <main id="main">
+        <!-- カート操作の結果 -->
+        <div class="container cart-feedback">
+            <p class="notice" th:if="${cartNotice}" th:text="${cartNotice}" role="status"></p>
+            <p class="alert" th:if="${cartError}" th:text="${cartError}" role="alert"></p>
+            <p id="cart-add-message" class="notice" role="status" aria-live="polite" hidden></p>
+        </div>
+
+        <!-- メインビジュアル -->
+        <section class="hero container">
+            <div class="hero-copy">
+                <p class="eyebrow">EVERYDAY, A LITTLE BETTER.</p>
+                <h1>あ、これも。<br>が見つかるストア。</h1>
+                <p>
+                    毎日に欠かせないものから、<br>
+                    ちょっと気分が上がるものまで。<br>
+                    いつものお買い物を、もっと身近に。
+                </p>
+                <a class="button primary" href="#products">
+                    商品を見にいく <span aria-hidden="true">↗</span>
+                </a>
+                <span class="hero-note">暮らしに寄りそう、オンラインコンビニ。</span>
+            </div>
+
+            <div class="hero-visual">
+                <img th:src="@{/images/everyday.svg}"
+                     src="/images/everyday.svg"
+                     alt="アプロスのバッグに、飲み物や日用品を詰めたイラスト"
+                     width="560" height="450">
+                <span class="visual-label">
+                    Little essentials.<br>Big everyday comfort.
+                </span>
+            </div>
+        </section>
+
+        <!-- ストアの特徴 -->
+        <div class="container intro-strip">
+            <span><b>01</b> 必要なものを、ひとつの場所で。</span>
+            <span><b>02</b> お買い物は、シンプルに。</span>
+            <span><b>03</b> 暮らしに合わせて、気軽に。</span>
+        </div>
+
+        <!-- 商品一覧 -->
+        <section id="products" class="container products-section">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">FIND YOUR EVERYDAY</p>
+                    <h2>商品を探す</h2>
+                </div>
+                <span class="muted" id="result-count" role="status" aria-live="polite"></span>
+            </div>
+
+            <!-- 検索・並び替え -->
+            <div class="catalog-toolbar">
+                <form class="search-form" id="product-search" role="search">
+                    <label class="sr-only" for="keyword">商品名で検索</label>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="10" cy="10" r="6"/>
+                        <path d="m15 15 5 5"/>
+                    </svg>
+                    <input id="keyword" type="search"
+                           placeholder="何をお探しですか？" autocomplete="off">
+                    <button type="submit">検索</button>
+                </form>
+
+                <label class="sort-label" for="sort">
+                    並び順
+                    <select id="sort">
+                        <option value="default">標準</option>
+                        <option value="low">価格が安い順</option>
+                        <option value="high">価格が高い順</option>
+                        <option value="name">商品名順</option>
+                    </select>
+                </label>
+            </div>
+
+            <!-- カテゴリー -->
+            <div class="category-tabs" role="group" aria-label="商品カテゴリー">
+                <button type="button" class="active" data-category="all" aria-pressed="true">すべての商品</button>
+                <button type="button" data-category="digital" aria-pressed="false">デジタル・家電</button>
+                <button type="button" data-category="fashion" aria-pressed="false">ファッション</button>
+                <button type="button" data-category="food" aria-pressed="false">食品・飲料</button>
+                <button type="button" data-category="book" aria-pressed="false">書籍・雑誌</button>
+            </div>
+
+            <noscript>
+                <p class="notice">
+                    検索・並び替えにはJavaScriptを有効にしてください。
+                    商品の購入はそのままご利用いただけます。
+                </p>
+            </noscript>
+
+            <!-- 商品カード -->
+            <div class="product-grid" id="product-grid">
+				<article class="product-card"
+				         th:each="product : ${products_list}"
+				         th:if="${product.categoryId != 9999}"
+				         th:attr="data-name=${product.name},
+				                  data-price=${product.price},
+				                  data-category-id=${product.categoryId}">
+					
+					<!-- 商品画像 -->
+                    <div class="product-image">
+                        <span class="stock-tag"
+                              th:if="${product.stock == null or product.stock <= 0}">SOLD OUT</span>
+						<a th:href="@{/products/{id}(id=${product.id})}">
+							<img loading="lazy" width="260" height="240"
+                             th:src="@{/images/products/{id}.png(id=${product.id})}"
+                             th:alt="${product.name}"
+                             data-product-image
+                             th:attr="data-fallback=@{/images/product-placeholder.svg}">
+						</a>
+						  
+                    </div>
+
+                    <div class="product-info">
+                        <p class="product-category">APROS SELECTION</p>
+                        <h3 th:text="${product.name}">商品名</h3>
+                        <p class="product-price">
+                            <strong th:text="${#numbers.formatInteger(product.price, 1, 'COMMA')}">0</strong>
+                            <span>円</span>
+                        </p>
+                        <p class="stock-text"
+                           th:text="${product.stock != null and product.stock > 0 ? '在庫あり' : 'ただいま品切れです'}">
+                            在庫あり
+                        </p>
+
+                        <!-- カート追加：JavaScript有効時は非同期で送信 -->
+                        <form th:action="@{/cart/add}" method="post" class="add-cart-form">
+                            <input type="hidden" name="productId" th:value="${product.id}">
+                            <button class="button add-cart" type="submit"
+                                    th:disabled="${product.stock == null or product.stock <= 0}">
+                                <span aria-hidden="true">＋</span>
+                                <span th:text="${product.stock != null and product.stock > 0 ? 'カートに入れる' : '在庫なし'}">
+                                    カートに入れる
+                                </span>
+                            </button>
+                        </form>
+                    </div>
+                </article>
+            </div>
+
+            <!-- 検索結果なし -->
+            <div class="empty-state" id="no-results" hidden>
+                <span class="empty-icon">⌕</span>
+                <h3>商品が見つかりませんでした</h3>
+                <p>別のキーワードやカテゴリーをお試しください。</p>
+                <button class="button secondary" id="reset-filters" type="button">
+                    条件をリセット
+                </button>
+            </div>
+        </section>
+
+        <!-- ストアメッセージ -->
+        <section class="container store-note">
+            <div>
+                <p class="eyebrow">HELLO, APROS.</p>
+                <h2>何気ない毎日を、<br>少しだけ心地よく。</h2>
+            </div>
+            <p>
+                忙しい日も、ゆっくり過ごす日も。<br>
+                必要なものを、必要なときに選べる場所。<br>
+                あなたの暮らしのそばに、アプロスストア。
+            </p>
+        </section>
+    </main>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+
+    <script>
+        // カート追加フォームを非同期で送信し、スクロール位置を維持する
+        document.querySelectorAll('.add-cart-form').forEach(form => {
+            form.addEventListener('submit', async event => {
+                event.preventDefault();
+
+                const button = form.querySelector('button[type="submit"]');
+                const message = document.getElementById('cart-add-message');
+                button.disabled = true;
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('カートに追加できませんでした。');
+                    }
+
+                    const count = await response.json();
+                    if (typeof count !== 'number') {
+                        throw new Error('カート情報を取得できませんでした。');
+                    }
+
+                    // 共通ヘッダーのカート件数を更新する
+                    document.querySelectorAll('[data-cart-count]').forEach(element => {
+                        element.textContent = count;
+                    });
+
+                    message.textContent = 'カートに追加しました。';
+                    message.className = 'notice';
+                    message.hidden = false;
+
+                } catch (error) {
+                    message.textContent = error.message;
+                    message.className = 'alert';
+                    message.hidden = false;
+                } finally {
+                    button.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

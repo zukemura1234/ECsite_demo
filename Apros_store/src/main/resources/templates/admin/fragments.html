@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- 管理画面共通の左メニュー。active: 'products' | 'users'、canEdit: 編集アカウントか -->
+<aside class="admin-sidebar" th:fragment="sidebar(active, canEdit)">
+    <a class="admin-brand" th:href="${canEdit} ? @{/admin/products} : @{/admin/view/products}"><span class="admin-brand-mark">a.</span><span>APROS <small>ADMIN CONSOLE</small></span></a>
+    <p class="admin-side-caption">DATABASE</p><div class="admin-side-db">▤ teamb_ec</div>
+    <a class="admin-side-link" th:classappend="${active == 'products'} ? 'active'" th:href="${canEdit} ? @{/admin/products} : @{/admin/view/products}">▦ &nbsp; products</a>
+    <a class="admin-side-link" th:classappend="${active == 'users'} ? 'active'" th:href="${canEdit} ? @{/admin/users} : @{/admin/view/users}">☺ &nbsp; users</a>
+    <p class="admin-side-caption">STORE</p><a class="admin-side-link" th:href="@{/}" target="_blank" rel="noopener">↗ &nbsp; ストアを開く</a>
+    <form class="admin-sidebar-bottom" th:action="@{/admin/logout}" method="post"><input type="hidden" name="adminCsrf" th:value="${session.adminCsrf}"><button class="admin-side-link admin-logout" type="submit">ログアウト</button></form>
+</aside>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#126349">
+    <title th:text="${title + ' | アプロスストア'}">アプロスストア</title>
+    <link rel="stylesheet" th:href="@{/css/store.css}" href="/css/store.css">
+    <script defer th:src="@{/js/store.js}" src="/js/store.js"></script>
+</head>
+<body>
+
+    <!-- 共通ヘッダー -->
+    <header th:fragment="header" class="site-header">
+        <a class="skip-link" href="#main">本文へ移動</a>
+
+        <div class="announcement">
+            いつもの暮らしに、ちょうどいい。
+            <span>APROS ONLINE STORE</span>
+        </div>
+
+        <div class="header-inner container">
+            <a th:href="@{/}" href="/" class="brand" aria-label="アプロスストア ホーム">
+                <span class="brand-mark" aria-hidden="true">a<span>•</span></span>
+                <span>
+                    <strong>アプロスストア</strong>
+                    <small>暮らしのそばに、いつも。</small>
+                </span>
+            </a>
+
+            <nav class="header-actions" aria-label="メインメニュー">
+                <a th:href="@{/#products}" href="/#products" class="shop-link">商品を探す</a>
+
+                <a th:if="${session.userId == null}" th:href="@{/login}" href="/login">
+                    ログイン
+                </a>
+                <a th:if="${session.userId == null}" th:href="@{/register}"
+                   href="/register" class="register-link">
+                    会員登録
+                </a>
+
+                <a th:if="${session.userId != null}" th:href="@{/mypage}" href="/mypage">
+                    マイページ
+                </a>
+
+                <a class="cart-link" th:href="@{/cart}" href="/cart">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 3h2l2.5 12h11l2-8H6M9 20h.01M18 20h.01"/>
+                    </svg>
+                    カート
+                    <!-- 非同期カート追加後にJavaScriptで件数を書き換える -->
+                    <span class="badge" data-cart-count th:text="${cartCount ?: 0}">0</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 共通フッター -->
+    <footer th:fragment="footer" class="site-footer">
+        <div class="container footer-inner">
+            <div>
+                <strong>アプロスストア</strong>
+                <p>毎日の「あると助かる」を、ここから。</p>
+            </div>
+            <div class="footer-meta">
+                <a th:href="@{/}" href="/">商品一覧</a>
+                <a th:href="@{/cart}" href="/cart">カート</a>
+                <small>© APROS STORE <span>学習用デモサイト</span></small>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 購入手順 -->
+    <ol th:fragment="steps(current)" class="steps" aria-label="購入手順">
+        <li th:classappend="${current == 1 ? 'current' : (current > 1 ? 'done' : '')}"
+            th:attr="aria-current=${current == 1 ? 'step' : null}">
+            <span>1</span>カート
+        </li>
+        <li th:classappend="${current == 2 ? 'current' : (current > 2 ? 'done' : '')}"
+            th:attr="aria-current=${current == 2 ? 'step' : null}">
+            <span>2</span>配送・お支払い
+        </li>
+        <li th:classappend="${current == 3 ? 'current' : (current > 3 ? 'done' : '')}"
+            th:attr="aria-current=${current == 3 ? 'step' : null}">
+            <span>3</span>ご注文確認
+        </li>
+        <li th:classappend="${current == 4 ? 'current' : ''}"
+            th:attr="aria-current=${current == 4 ? 'step' : null}">
+            <span>4</span>完了
+        </li>
+    </ol>
+
+    <!-- 注文合計 -->
+    <aside th:fragment="summary" class="panel order-summary">
+        <p class="eyebrow">YOUR CART</p>
+        <h2>ご注文の合計</h2>
+        <dl class="totals">
+            <div>
+                <dt>商品点数</dt>
+                <dd><span th:text="${cartCount}">0</span>点</dd>
+            </div>
+            <div>
+                <dt>商品合計</dt>
+                <dd>
+                    <span th:text="${#numbers.formatInteger(totalPrice, 1, 'COMMA')}">0</span>円
+                </dd>
+            </div>
+        </dl>
+        <div class="grand-total">
+            <span>合計金額</span>
+            <strong>
+                <span th:text="${#numbers.formatInteger(totalPrice, 1, 'COMMA')}">0</span>
+                <small>円</small>
+            </strong>
+        </div>
+        <p class="muted tiny">
+            表示価格の合計です。このデモでは送料・手数料の加算はありません。
+        </p>
+    </aside>
+
+    <!-- カート商品一覧 -->
+    <section th:fragment="items(editable)" class="panel items-panel">
+        <div class="section-heading">
+            <h2>ご注文の商品</h2>
+            <span class="muted"><span th:text="${cartCount}">0</span>点</span>
+        </div>
+
+        <div class="cart-row" th:each="item : ${cartItems}">
+            <div class="cart-product">
+                <img width="80" height="80"
+                     th:src="@{/images/products/{id}.png(id=${item.key.id})}"
+                     th:alt="${item.key.name}"
+                     data-product-image
+                     th:attr="data-fallback=@{/images/product-placeholder.svg}">
+                <div>
+                    <h3 th:text="${item.key.name}">商品名</h3>
+                    <p class="muted tiny">
+                        単価
+                        <span th:text="${#numbers.formatInteger(item.key.price, 1, 'COMMA')}">0</span>円
+                    </p>
+                    <p class="field-error"
+                       th:if="${item.key.stock == null or item.value > item.key.stock or item.key.categoryId == 9999}">
+                        在庫または販売状況が変わりました。カートを修正してください。
+                    </p>
+                </div>
+            </div>
+
+            <div class="quantity-area">
+                <form th:if="${editable}" th:action="@{/cart/quantity}"
+                      method="post" class="quantity">
+                    <input type="hidden" name="productId" th:value="${item.key.id}">
+                    <button name="change" value="-1" type="submit"
+                            th:attr="aria-label=${item.key.name + 'の数量を減らす'}">−</button>
+                    <span th:text="${item.value}">1</span>
+                    <button name="change" value="1" type="submit"
+                            th:disabled="${item.key.stock == null or item.value >= item.key.stock or item.key.categoryId == 9999}"
+                            th:attr="aria-label=${item.key.name + 'の数量を増やす'}">＋</button>
+                </form>
+
+                <span th:unless="${editable}">
+                    数量 <span th:text="${item.value}">1</span>
+                </span>
+
+                <form th:if="${editable}" th:action="@{/cart/delete}" method="post">
+                    <input type="hidden" name="productId" th:value="${item.key.id}">
+                    <button class="remove-button" type="submit"
+                            th:attr="aria-label=${item.key.name + 'をカートから削除'}">削除</button>
+                </form>
+            </div>
+
+            <strong class="line-price">
+                <span th:text="${#numbers.formatInteger(item.key.price * item.value, 1, 'COMMA')}">0</span>
+                <small>円</small>
+            </strong>
+        </div>
+    </section>
+
+</body>
+</html>

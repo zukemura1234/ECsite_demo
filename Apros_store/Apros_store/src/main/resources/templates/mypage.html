@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('マイページ')}">
+    <title>マイページ | アプロスストア</title>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main id="main" class="page-main container mypage-page">
+    <nav class="breadcrumb" aria-label="パンくずリスト">
+        <a th:href="@{/}" href="/">トップ</a><span>/</span><span>マイページ</span>
+    </nav>
+
+    <section class="page-heading">
+        <p class="eyebrow">MY ACCOUNT</p>
+        <h1>マイページ</h1>
+        <p>登録情報やご注文履歴を確認できます。</p>
+    </section>
+
+    <p class="notice" th:if="${success}" th:text="${success}" role="status"></p>
+
+    <section class="panel mypage-welcome">
+        <p class="eyebrow">WELCOME BACK</p>
+        <h2><span th:text="${userName}">ユーザー名</span> さん</h2>
+    </section>
+
+    <section class="mypage-menu" aria-label="マイページメニュー">
+        <a class="panel mypage-menu-card" th:href="@{/mypage/profile}" href="/mypage/profile">
+            <span class="mypage-menu-icon" aria-hidden="true">✎</span>
+            <span>
+                <strong>ユーザー情報を編集</strong>
+                <small>名前・メールアドレス・住所などを変更します。</small>
+            </span>
+            <span class="mypage-arrow" aria-hidden="true">›</span>
+        </a>
+        <a class="panel mypage-menu-card" th:href="@{/mypage/orders}" href="/mypage/orders">
+            <span class="mypage-menu-icon" aria-hidden="true">▤</span>
+            <span>
+                <strong>注文履歴</strong>
+                <small>購入した商品・金額・購入日時・注文状態を確認します。</small>
+            </span>
+            <span class="mypage-arrow" aria-hidden="true">›</span>
+        </a>
+    </section>
+
+    <section class="panel mypage-logout">
+        <h2>アカウント</h2>
+        <p class="muted">お買い物を終了するときはこちらからログアウトできます。</p>
+        <form th:action="@{/logout}" action="/logout" method="post">
+            <button class="button secondary" type="submit">ログアウト</button>
+        </form>
+    </section>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<style>
+.mypage-page{max-width:900px}.mypage-welcome{margin-bottom:22px;background:#f3f6ef}
+.mypage-welcome h2{font-size:25px;margin:8px 0 0}
+.mypage-menu{display:grid;gap:14px;margin-bottom:24px}
+.mypage-menu-card{display:flex;align-items:center;gap:17px;text-decoration:none;color:inherit;transition:transform .15s,border-color .15s}
+.mypage-menu-card:hover{transform:translateY(-2px);border-color:#a6b99c}
+.mypage-menu-card>span:nth-child(2){display:grid;gap:7px;flex:1}
+.mypage-menu-card strong{font-size:15px}.mypage-menu-card small{font-size:12px;color:#6b756b}
+.mypage-menu-icon{width:46px;height:46px;display:grid;place-items:center;border-radius:10px;background:#edf3e7;color:#286044;font-size:25px;flex-shrink:0}
+.mypage-arrow{font-size:27px;color:#6f806c}.mypage-logout h2{font-size:17px}
+@media(max-width:600px){.mypage-menu-card{padding:18px;gap:12px}.mypage-menu-card small{line-height:1.7}}
+</style>
+</body>
+</html>

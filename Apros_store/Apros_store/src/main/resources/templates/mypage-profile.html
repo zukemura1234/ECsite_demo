@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('ユーザー情報の編集')}">
+    <title>ユーザー情報の編集 | アプロスストア</title>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main id="main" class="page-main container profile-page">
+    <nav class="breadcrumb" aria-label="パンくずリスト">
+        <a th:href="@{/}" href="/">トップ</a><span>/</span>
+        <a th:href="@{/mypage}" href="/mypage">マイページ</a><span>/</span><span>ユーザー情報の編集</span>
+    </nav>
+    <section class="page-heading">
+        <p class="eyebrow">PROFILE</p>
+        <h1>ユーザー情報の編集</h1>
+        <p>登録済みの情報が入力欄に表示されています。変更する項目を編集してください。</p>
+    </section>
+
+    <p class="alert" th:if="${error}" th:text="${error}" role="alert"></p>
+
+    <form class="panel profile-form" th:action="@{/mypage/profile}" action="/mypage/profile" method="post">
+        <div class="field">
+            <label for="name">名前 <span class="required">必須</span></label>
+            <input id="name" name="name" type="text" maxlength="100" required
+                   th:value="${user.name}" value="">
+        </div>
+        <div class="field">
+            <label for="email">メールアドレス <span class="required">必須</span></label>
+            <input id="email" name="email" type="email" maxlength="255" required
+                   th:value="${user.email}" value="">
+        </div>
+        <div class="field">
+            <label for="postalCode">郵便番号 <span class="required">必須</span></label>
+            <input id="postalCode" name="postalCode" type="text" maxlength="8" required
+                   placeholder="例：123-4567" th:value="${user.postalCode}" value="">
+        </div>
+        <div class="field">
+            <label for="prefecture">都道府県 <span class="required">必須</span></label>
+            <input id="prefecture" name="prefecture" type="text" maxlength="20" required
+                   th:value="${user.prefecture}" value="">
+        </div>
+        <div class="field">
+            <label for="city">市区町村 <span class="required">必須</span></label>
+            <input id="city" name="city" type="text" maxlength="100" required
+                   th:value="${user.city}" value="">
+        </div>
+        <div class="field">
+            <label for="addressLine">住所 <span class="required">必須</span></label>
+            <input id="addressLine" name="addressLine" type="text" maxlength="255" required
+                   th:value="${user.addressLine}" value="">
+        </div>
+        <div class="field">
+            <label for="building">建物名 <span class="optional">任意</span></label>
+            <input id="building" name="building" type="text" maxlength="255"
+                   th:value="${user.building}" value="">
+        </div>
+        <div class="profile-actions">
+            <a class="button secondary" th:href="@{/mypage}" href="/mypage">戻る</a>
+            <button class="button primary" type="submit">変更を保存</button>
+        </div>
+    </form>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<style>
+.profile-page{max-width:760px}.profile-form{display:grid;gap:4px}
+.profile-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:12px}
+.profile-actions .button{display:inline-flex;align-items:center;justify-content:center;min-width:130px;text-decoration:none}
+@media(max-width:520px){.profile-actions{flex-direction:column-reverse}.profile-actions .button{width:100%}}
+</style>
+</body>
+</html>

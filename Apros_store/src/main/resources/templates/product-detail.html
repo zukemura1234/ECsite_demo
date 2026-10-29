@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/layout :: head('商品詳細ページ')}">
+    <meta charset="UTF-8">
+    <title>商品詳細ページ</title>
+</head>
+
+<body>
+
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container products-section">
+
+    <p>
+        <a th:href="@{/}">← 商品一覧に戻る</a>
+    </p>
+
+    <!-- 商品基本情報 -->
+    <div style="display:grid;
+                grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+                gap:32px;
+                margin:32px 0;">
+
+        <!-- 商品画像 -->
+		<div class="product-detail-image">
+		    <img th:src="@{/images/products/{id}.png(id=${product.id})}"
+		         th:alt="${product.name}"
+		         th:attr="data-fallback=@{/images/product-placeholder.svg}"
+		         data-product-image>
+
+		    <span class="stock-tag"
+		          th:if="${product.stock == null or product.stock <= 0}">
+		        SOLD OUT
+		    </span>
+			<p class="ai-image-notice">
+				<span aria-hidden="true">ⓘ</span>
+				この商品画像は生成AIを使用したイメージです。
+			</p>
+		</div>
+
+        <!-- 商品名・価格・在庫 -->
+        <div class="product-info">
+
+            <p class="product-category">APROS SELECTION</p>
+
+            <h1 th:text="${product.name}">商品名</h1>
+
+            <p class="product-price">
+                <strong th:text="${#numbers.formatInteger(product.price, 1, 'COMMA')}">
+                    0
+                </strong>
+                <span>円</span>
+            </p>
+
+
+            <!-- カート追加 -->
+			<form th:action="@{/cart/add}"
+			      method="post"
+			      class="add-cart-form">
+
+			    <input type="hidden"
+			           name="productId"
+			           th:value="${product.id}">
+
+			    <button class="button primary"
+			            type="submit"
+			            th:disabled="${product.stock == null or product.stock <= 0}">
+			        カートに追加
+			    </button>
+			</form>
+
+			<p id="cart-add-message"
+			   class="notice"
+			   role="status"
+			   aria-live="polite"
+			   hidden></p>
+
+        </div>
+    </div>
+
+    <!-- カテゴリー別詳細 -->
+    <section style="margin:32px 0;">
+
+        <h2>商品詳細情報</h2>
+
+        <!-- 詳細情報がない場合 -->
+        <p th:if="${detail == null}">
+            この商品の詳細情報は登録されていません。
+        </p>
+
+        <!-- 電化製品 -->
+        <table th:if="${detail != null and product.categoryId == 1}">
+
+            <tr>
+                <th>ブランド</th>
+                <td th:text="${detail.brand}"></td>
+            </tr>
+
+            <tr>
+                <th>カラー</th>
+                <td th:text="${detail.color}"></td>
+            </tr>
+
+            <tr>
+                <th>サイズ</th>
+                <td th:text="${detail.size}"></td>
+            </tr>
+
+            <tr>
+                <th>種類</th>
+                <td th:text="${detail.type}"></td>
+            </tr>
+
+        </table>
+
+        <!-- 衣類 -->
+        <table th:if="${detail != null and product.categoryId == 2}">
+
+            <tr>
+                <th>ブランド</th>
+                <td th:text="${detail.brand}"></td>
+            </tr>
+
+            <tr>
+                <th>カラー</th>
+                <td th:text="${detail.color}"></td>
+            </tr>
+
+            <tr>
+                <th>モデル</th>
+                <td th:text="${detail.model}"></td>
+            </tr>
+
+            <tr>
+                <th>その他</th>
+                <td th:text="${detail.other}"></td>
+            </tr>
+
+        </table>
+
+        <!-- 食品 -->
+        <table th:if="${detail != null and product.categoryId == 3}">
+
+            <tr>
+                <th>賞味期限</th>
+                <td th:text="${detail.expirationDate}"></td>
+            </tr>
+
+            <tr>
+                <th>保存方法</th>
+                <td th:text="${detail.storageMethod}"></td>
+            </tr>
+
+            <tr>
+                <th>アレルゲン</th>
+                <td th:text="${detail.allergens}"></td>
+            </tr>
+
+            <tr>
+                <th>内容量</th>
+                <td th:text="${detail.contentVolume}"></td>
+            </tr>
+
+        </table>
+
+        <!-- 書籍 -->
+        <table th:if="${detail != null and product.categoryId == 4}">
+
+            <tr>
+                <th>著者</th>
+                <td th:text="${detail.author}"></td>
+            </tr>
+
+            <tr>
+                <th>出版社</th>
+                <td th:text="${detail.publisher}"></td>
+            </tr>
+
+            <tr>
+                <th>発行日</th>
+                <td th:text="${detail.issueDate}"></td>
+            </tr>
+
+        </table>
+
+    </section>
+
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<script>
+    document.querySelectorAll('.add-cart-form').forEach(form => {
+        form.addEventListener('submit', async event => {
+            event.preventDefault();
+            const button = form.querySelector('button[type="submit"]');
+            const message = document.getElementById('cart-add-message');
+            button.disabled = true;
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form)
+                });
+                if (!response.ok) throw new Error('カートに追加できませんでした。');
+                const count = await response.json();
+                if (typeof count !== 'number') throw new Error('カート情報を取得できませんでした。');
+                document.querySelectorAll('[data-cart-count]').forEach(element => {
+                    element.textContent = count;
+                });
+                message.textContent = 'カートに追加しました。';
+                message.className = 'notice';
+                message.hidden = false;
+            } catch (error) {
+                message.textContent = error.message;
+                message.className = 'alert';
+                message.hidden = false;
+            } finally {
+                button.disabled = false;
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

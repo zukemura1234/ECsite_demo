@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title th:text="${isNew ? '商品追加' : '商品編集'} + ' | APROS Admin'">商品編集 | APROS Admin</title><link rel="stylesheet" th:href="@{/css/admin.css}"></head>
+<body class="admin-body"><div class="admin-shell">
+    <aside th:replace="~{admin/fragments :: sidebar('products', true)}"></aside>
+    <main class="admin-content">
+        <header class="admin-topbar"><span>データベース / <a th:href="@{/admin/products}">products</a> / <strong th:text="${isNew ? '追加' : '編集'}">編集</strong></span><span class="admin-topbar-note">管理者専用</span></header>
+        <div class="admin-main admin-form-page">
+            <a class="admin-back" th:href="@{/admin/products}">← レコード一覧に戻る</a>
+            <p class="admin-eyebrow">PRODUCT RECORD</p>
+            <h1 th:text="${isNew ? '新規レコードを追加' : '商品情報を編集'}">商品情報を編集</h1>
+            <p class="admin-muted">products テーブルの値を保存するとストア側にも反映されます。</p>
+            <form class="admin-panel admin-edit-form" th:object="${productForm}" th:action="${isNew} ? @{/admin/products/new} : @{/admin/products/{id}/edit(id=${productId})}" method="post">
+                <input type="hidden" name="adminCsrf" th:value="${session.adminCsrf}">
+                <div class="admin-edit-title"><h2>レコード情報</h2><span>products</span></div>
+                <div class="admin-form-row"><label for="id"><strong>id</strong><small>商品ID</small></label><div><input id="id" type="number" th:field="*{id}" th:readonly="${!isNew}" min="1" step="1" required><p class="admin-field-note" th:if="${!isNew}">既存の主キーは変更できません。</p><p class="admin-field-error" th:if="${#fields.hasErrors('id')}" th:errors="*{id}"></p></div></div>
+                <div class="admin-form-row"><label for="name"><strong>name</strong><small>商品名</small></label><div><input id="name" type="text" th:field="*{name}" maxlength="100" required><p class="admin-field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p></div></div>
+                <div class="admin-form-row"><label for="price"><strong>price</strong><small>価格（円）</small></label><div><input id="price" type="number" th:field="*{price}" min="0" step="1" required><p class="admin-field-error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></p></div></div>
+                <div class="admin-form-row"><label for="stock"><strong>stock</strong><small>在庫数</small></label><div><input id="stock" type="number" th:field="*{stock}" min="0" step="1" required><p class="admin-field-note">注文とキャンセルでも在庫数は増減します。</p><p class="admin-field-error" th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}"></p></div></div>
+                <div class="admin-form-row"><label for="categoryId"><strong>category_id</strong><small>カテゴリー</small></label><div>
+                    <select id="categoryId" th:field="*{categoryId}" required><option value="1">1 / デジタル・家電</option><option value="2">2 / ファッション</option><option value="3">3 / 食品・飲料</option><option value="4">4 / 書籍・雑誌</option><option value="9999">9999 / 販売終了</option></select>
+                    <p class="admin-field-note">9999 に変更すると商品一覧から除外され、購入できなくなります。</p><p class="admin-field-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></p></div></div>
+                <div class="admin-form-actions"><a class="admin-btn admin-btn-outline" th:href="@{/admin/products}">キャンセル</a><button type="submit" class="admin-btn admin-btn-primary" th:text="${isNew ? '＋ 商品を追加' : '変更を保存'}">変更を保存</button></div>
+            </form>
+            <p class="admin-help">※ 商品画像は <code>static/images/products/商品ID.png</code> へ配置します。カテゴリー別詳細テーブルの変更は含みません。</p>
+        </div>
+    </main>
+</div></body></html>

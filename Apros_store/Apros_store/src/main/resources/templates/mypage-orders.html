@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('注文履歴')}">
+	<link rel="stylesheet" th:href="@{/css/mypage-orders.css}">
+    <title>注文履歴 | アプロスストア</title>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main id="main" class="page-main container orders-page">
+    <nav class="breadcrumb" aria-label="パンくずリスト">
+        <a th:href="@{/}">トップ</a><span>/</span>
+        <a th:href="@{/mypage}">マイページ</a><span>/</span><span>注文履歴</span>
+    </nav>
+
+    <section class="page-heading">
+        <p class="eyebrow">ORDER HISTORY</p>
+        <h1>注文履歴</h1>
+        <p>ご注文ごとの商品・金額・注文日時・注文状態を確認できます。</p>
+    </section>
+
+    <div class="empty-orders panel" th:if="${#lists.isEmpty(orders)}">
+        <p>注文履歴はまだありません。</p>
+        <a class="button primary" th:href="@{/}">商品を探す</a>
+    </div>
+
+    <section class="order-history-list" th:unless="${#lists.isEmpty(orders)}">
+        <article class="panel history-order" th:each="order : ${orders}">
+            <div class="history-order-heading">
+                <div>
+                    <p class="eyebrow">ORDER</p>
+                    <h2>注文番号：<span th:text="${order.id}">1001</span></h2>
+                    <p class="order-date">注文日時：
+                        <time th:if="${order.orderedAt != null}"
+                              th:text="${#temporals.format(order.orderedAt, 'yyyy/MM/dd HH:mm:ss')}">2026/10/25 14:32:18</time>
+                        <span th:if="${order.orderedAt == null}">記録なし</span>
+                    </p>
+                </div>
+                <span class="order-status"
+                      th:text="${order.status != null ? order.status : '状態未設定'}">注文確定</span>
+            </div>
+
+            <div class="history-items">
+                <div class="history-item" th:each="item : ${order.items}">
+                    <img class="history-product-image"
+                         th:classappend="${item.discontinued} ? ' is-ended' : ''"
+                         th:src="@{/images/products/{id}.png(id=${item.productId})}"
+                         th:alt="${item.productName}"
+                         onerror="this.onerror=null;this.src='/images/product-placeholder.svg';">
+
+                    <div class="history-product-info">
+                        <h3 th:text="${item.productName}">商品名</h3>
+                        <p class="history-ended-message" th:if="${item.discontinued}">
+                            <span class="history-ended-icon" aria-hidden="true">i</span>
+                            販売を終了しました
+                        </p>
+                        <p>単価：<strong th:text="${#numbers.formatInteger(item.price, 1, 'COMMA')}">3,980</strong>円</p>
+                        <p>数量：<span th:text="${item.quantity}">2</span>点</p>
+                    </div>
+
+                    <div class="history-item-subtotal">
+                        <span>小計</span>
+                        <strong><span th:text="${#numbers.formatInteger(item.subtotal, 1, 'COMMA')}">7,960</span>円</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="history-order-total">
+                <span>注文合計</span>
+                <strong><span th:text="${#numbers.formatInteger(order.totalPrice, 1, 'COMMA')}">10,940</span>円</strong>
+            </div>
+        </article>
+    </section>
+
+    <a class="back-link" th:href="@{/mypage}">← マイページに戻る</a>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<!-- layout の head フラグメント内に /css/mypage-orders.css を読み込む link を追加してください -->
+</body>
+</html>

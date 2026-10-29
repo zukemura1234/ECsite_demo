@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>管理者ログイン | APROS</title><link rel="stylesheet" th:href="@{/css/admin.css}"></head>
+<body class="admin-login-body">
+<main class="admin-login-card">
+    <div class="admin-logo" aria-hidden="true">a.</div>
+    <p class="admin-eyebrow">APROS / ADMINISTRATION</p>
+    <h1>管理者ログイン</h1>
+    <p class="admin-muted">商品情報の管理には管理者アカウントが必要です。</p>
+    <p class="admin-alert" th:if="${error}" th:text="${error}" role="alert"></p>
+    <form th:action="@{/admin/login}" method="post" class="admin-fields">
+        <input type="hidden" name="adminCsrf" th:value="${session.adminCsrf}">
+        <label for="username">管理者ID</label>
+        <input id="username" name="username" type="text" maxlength="80" autocomplete="username" required autofocus>
+        <label for="password">パスワード</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+        <button class="admin-btn admin-btn-primary" type="submit">ログイン</button>
+    </form>
+    <a class="admin-back" th:href="@{/}">← ストアへ戻る</a>
+</main>
+</body></html>

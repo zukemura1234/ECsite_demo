@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/layout :: head('配送先・お支払い')}">
+    <title>配送先・お支払い | アプロスストア</title>
+</head>
+
+<body>
+    <!-- 共通ヘッダー -->
+    <header th:replace="~{fragments/layout :: header}"></header>
+
+    <main id="main" class="container page-main">
+        <!-- 購入手順 -->
+        <div th:replace="~{fragments/layout :: steps(2)}"></div>
+
+        <div class="page-heading">
+            <p class="eyebrow">CHECKOUT</p>
+            <h1>配送先・お支払い</h1>
+            <p>お届け先とお支払い方法をお選びください。</p>
+        </div>
+
+        <div class="checkout-grid">
+            <div class="stack">
+                <!-- カート内の商品一覧 -->
+                <section th:replace="~{fragments/layout :: items(false)}"></section>
+
+                <!-- 注文情報入力フォーム -->
+                <form id="checkout-form"
+                      th:action="@{/checkout/confirm}"
+                      method="post"
+                      data-submit-once>
+
+                    <p class="alert" th:if="${error}" th:text="${error}" role="alert"></p>
+
+                    <!-- 01. お届け先 -->
+                    <section class="panel">
+                        <h2><span class="section-number">01</span> お届け先</h2>
+
+						<fieldset>
+						    <legend class="sr-only">お届け先の選択</legend>
+
+						    <!-- 登録した住所を使用 -->
+						    <label class="choice">
+						        <input type="radio"
+						               name="shippingType"
+						               value="registered"
+						               th:checked="${shippingType == null or shippingType == 'registered'}">
+
+						        <span>
+						            <strong>登録した住所に届ける</strong>
+						            <small>会員登録時のお届け先を使用します。</small>
+						        </span>
+						    </label>
+
+						    <!-- 別の住所を入力 -->
+						    <label class="choice">
+						        <input type="radio"
+						               name="shippingType"
+						               value="new"
+						               th:checked="${shippingType == 'new'}">
+
+						        <span>
+						            <strong>別の住所に届ける</strong>
+						            <small>今回のご注文のお届け先を入力します。</small>
+						        </span>
+						    </label>
+						</fieldset>
+
+                        <!-- 登録住所：JavaScriptで参照するデータ -->
+                        <div id="registered-address"
+                             hidden
+                             th:attr="data-name=${registeredUser.name},
+                                      data-postal-code=${registeredUser.postalCode},
+                                      data-prefecture=${registeredUser.prefecture},
+                                      data-city=${registeredUser.city},
+                                      data-address-line=${registeredUser.addressLine},
+                                      data-building=${registeredUser.building}">
+                        </div>
+
+                        <!-- 配送先入力欄 -->
+                        <div id="shipping-fields">
+                            <div class="form-grid">
+                                <div class="field wide">
+                                    <label for="name">お名前 <span class="required">必須</span></label>
+                                    <input id="name"
+                                           type="text"
+                                           name="name"
+                                           th:value="${user.name}"
+                                           class=""
+                                           placeholder="例：山田 太郎"
+                                           autocomplete="name"
+                                           required>
+                                </div>
+
+                                <div class="field ">
+                                    <label for="postalCode">郵便番号 <span class="required">必須</span></label>
+                                    <input id="postalCode"
+                                           type="text"
+                                           name="postalCode"
+                                           th:value="${user.postalCode}"
+                                           class="p-postal-code"
+                                           placeholder="例：9011303"
+                                           autocomplete="postal-code"
+                                           required
+                                           inputmode="numeric"
+                                           pattern="[0-9]{3}-?[0-9]{4}"
+                                           maxlength="8"
+                                           aria-describedby="postal-hint">
+                                    <p class="hint" id="postal-hint">7桁の郵便番号（ハイフン可）</p>
+                                </div>
+
+                                <div class="field ">
+                                    <label for="prefecture">都道府県 <span class="required">必須</span></label>
+                                    <input id="prefecture"
+                                           type="text"
+                                           name="prefecture"
+                                           th:value="${user.prefecture}"
+                                           class="p-region"
+                                           placeholder="例：沖縄県"
+                                           autocomplete="address-level1"
+                                           required>
+                                </div>
+
+                                <div class="field ">
+                                    <label for="city">市区町村 <span class="required">必須</span></label>
+                                    <input id="city"
+                                           type="text"
+                                           name="city"
+                                           th:value="${user.city}"
+                                           class="p-locality"
+                                           placeholder="例：島尻郡与那原町"
+                                           autocomplete="address-level2"
+                                           required>
+                                </div>
+
+                                <div class="field wide">
+                                    <label for="addressLine">町域・番地 <span class="required">必須</span></label>
+                                    <input id="addressLine"
+                                           type="text"
+                                           name="addressLine"
+                                           th:value="${user.addressLine}"
+                                           class="p-street-address"
+                                           placeholder="例：与那原1-2-3"
+                                           autocomplete="address-line1"
+                                           required>
+                                </div>
+
+                                <div class="field wide">
+                                    <label for="building">建物名・部屋番号 <span class="optional">任意</span></label>
+                                    <input id="building"
+                                           type="text"
+                                           name="building"
+                                           th:value="${user.building}"
+                                           class=""
+                                           placeholder="例：アプロスハイツ 101号室"
+                                           autocomplete="address-line2">
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="hint" id="shipping-hint">
+                            登録住所を変更する場合は「別の住所に届ける」を選択してください。
+                        </p>
+                    </section>
+
+                    <!-- 02. お支払い方法 -->
+                    <section class="panel payment-panel">
+                        <h2><span class="section-number">02</span> お支払い方法</h2>
+                        <p class="muted tiny">学習用の注文体験です。実際の決済・配送は行われません。</p>
+
+                        <fieldset>
+                            <legend class="sr-only">お支払い方法を選択</legend>
+
+                            <label class="choice">
+                                <input type="radio"
+                                       name="paymentMethod"
+                                       value="代引き"
+                                       th:checked="${paymentMethod == '代引き'}"
+                                       required>
+                                <span>
+                                    <strong>代金引換</strong>
+                                    <small>お届け時にお支払い（デモ）</small>
+                                </span>
+                            </label>
+
+                            <label class="choice">
+                                <input type="radio"
+                                       name="paymentMethod"
+                                       value="銀行振込"
+                                       th:checked="${paymentMethod == '銀行振込'}">
+                                <span>
+                                    <strong>銀行振込</strong>
+                                    <small>お振り込みでお支払い（デモ）</small>
+                                </span>
+                            </label>
+
+                            <label class="choice">
+                                <input type="radio"
+                                       name="paymentMethod"
+                                       value="クレジットカード"
+                                       th:checked="${paymentMethod == 'クレジットカード'}">
+                                <span>
+                                    <strong>クレジットカード <span class="small-tag">テスト用</span></strong>
+                                    <small>カード情報の入力・保存はありません。</small>
+                                </span>
+                            </label>
+                        </fieldset>
+                    </section>
+                </form>
+
+                <a class="back-link" th:href="@{/cart}">← カートを修正する</a>
+            </div>
+
+            <!-- 右側：注文合計と確認ボタン -->
+            <div class="sticky-column">
+                <aside th:replace="~{fragments/layout :: summary}"></aside>
+                <button class="button primary full"
+                        type="submit"
+                        form="checkout-form">
+                    注文内容を確認する →
+                </button>
+                <p class="muted tiny centered">次の画面で、ご注文内容を確認できます。</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- 共通フッター -->
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

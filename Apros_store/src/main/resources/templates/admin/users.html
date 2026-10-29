@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>users | APROS Admin</title><link rel="stylesheet" th:href="@{/css/admin.css}"></head>
+<body class="admin-body"><div class="admin-shell">
+    <aside th:replace="~{admin/fragments :: sidebar('users', ${canEdit})}"></aside>
+    <main class="admin-content">
+        <header class="admin-topbar"><span>データベース / <strong>users</strong></span><span class="admin-topbar-note" th:text="${canEdit} ? '管理者専用' : '参照専用'">管理者専用</span></header>
+        <div class="admin-main">
+            <div class="admin-title-row"><div><p class="admin-eyebrow">TABLE MANAGEMENT</p><h1>ユーザー管理 <span class="admin-title-en">users</span></h1><p class="admin-muted" th:text="${canEdit} ? 'ユーザー情報を確認し、アクティブ／非アクティブを切り替えられます。' : 'ユーザー情報を参照できます（このアカウントでは変更できません）。'">ユーザー情報を確認できます。</p></div></div>
+            <div class="admin-stats"><div class="admin-stat"><span>全ユーザー数</span><strong th:text="${totalCount}">0</strong></div><div class="admin-stat"><span>検索結果</span><strong th:text="${users.totalElements}">0</strong></div><div class="admin-stat"><span>アクティブ / 非アクティブ</span><strong th:text="|${activeCount} / ${inactiveCount}|">0 / 0</strong></div></div>
+            <p class="admin-success" th:if="${success}" th:text="${success}" role="status"></p>
+            <section class="admin-panel">
+                <div class="admin-panel-header"><div><h2>レコード一覧</h2><p>ユーザーテーブルを表示しています（パスワード情報は表示しません）</p></div><span class="admin-record-count" th:text="|${users.totalElements} 件|"></span></div>
+                <form class="admin-search" th:action="@{${basePath}}" method="get" role="search">
+                    <label class="admin-search-keyword"><span>名前・メールで検索</span><input type="search" name="q" th:value="${q}" placeholder="例：山田、example.com" maxlength="100"></label>
+                    <label class="admin-search-category"><span>ステータス</span><select name="status">
+                        <option value="all" th:selected="${status == 'all'}">すべて</option>
+                        <option value="1" th:selected="${status == '1'}">1 / アクティブ</option>
+                        <option value="0" th:selected="${status == '0'}">0 / 非アクティブ</option>
+                    </select></label>
+                    <button class="admin-btn admin-btn-primary" type="submit">絞り込む</button><a class="admin-btn admin-btn-outline" th:href="@{${basePath}}">クリア</a>
+                </form>
+                <div class="admin-table-wrap"><table class="admin-table">
+                    <thead><tr><th>ID</th><th>名前</th><th>メール</th><th>住所</th><th>登録日時</th><th>ステータス</th><th th:if="${canEdit}">操作</th></tr></thead>
+                    <tbody><tr th:each="u : ${users.content}">
+                        <td class="admin-id" th:text="${u.id}">1</td>
+                        <td><strong th:text="${u.name}">名前</strong></td>
+                        <td class="admin-wrap" th:text="${u.email}">user@example.com</td>
+                        <td class="admin-wrap" th:text="${u.address}">住所</td>
+                        <td class="admin-number" th:text="${u.createdAt}">2026/01/01 00:00</td>
+                        <td><span class="admin-pill admin-pill-on" th:if="${u.active}">1 / アクティブ</span><span class="admin-pill admin-pill-ended" th:unless="${u.active}">0 / 非アクティブ</span></td>
+                        <td th:if="${canEdit}">
+                            <form class="admin-inline-form" th:action="@{/admin/users/{id}/active(id=${u.id})}" method="post"
+                                  th:data-confirm="${u.active} ? 'このユーザーを非アクティブにしますか？' : 'このユーザーをアクティブに戻しますか？'"
+                                  onsubmit="return confirm(this.dataset.confirm)">
+                                <input type="hidden" name="adminCsrf" th:value="${session.adminCsrf}">
+                                <input type="hidden" name="active" th:value="${u.active} ? 0 : 1">
+                                <input type="hidden" name="q" th:value="${q}"><input type="hidden" name="status" th:value="${status}"><input type="hidden" name="page" th:value="${users.number}">
+                                <button type="submit" class="admin-btn admin-btn-outline admin-btn-small" th:text="${u.active} ? '非アクティブにする' : 'アクティブにする'">切り替え</button>
+                            </form>
+                        </td>
+                    </tr><tr th:if="${users.empty}"><td th:attr="colspan=${canEdit} ? 7 : 6" class="admin-empty">該当するユーザーはいません。</td></tr></tbody>
+                </table></div>
+                <nav class="admin-pagination" aria-label="ページ切替" th:if="${users.totalPages > 1}">
+                    <a th:if="${users.hasPrevious()}" th:href="@{${basePath}(q=${q},status=${status},page=${users.number - 1})}">← 前へ</a>
+                    <span th:text="|${users.number + 1} / ${users.totalPages} ページ|">1 / 3 ページ</span>
+                    <a th:if="${users.hasNext()}" th:href="@{${basePath}(q=${q},status=${status},page=${users.number + 1})}">次へ →</a>
+                </nav>
+            </section>
+            <p class="admin-help">※ ユーザー情報（名前・メール・住所など）の編集はできません。変更できるのはアクティブ状態のみです。</p>
+        </div>
+    </main>
+</div></body></html>
